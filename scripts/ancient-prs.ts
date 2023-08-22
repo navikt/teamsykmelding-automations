@@ -14,6 +14,11 @@ type PrNode = {
   title: string;
   updatedAt: string;
   permalink: string;
+  isDraft: boolean;
+  author: {
+    avatarUrl: string;
+    login: string;
+  };
 };
 
 type RepoNodes = {
@@ -45,6 +50,11 @@ const activePrsQuery = /* GraphQL */ `
                 title
                 updatedAt
                 permalink
+                isDraft
+                author {
+                  avatarUrl
+                  login
+                }
               }
             }
           }
@@ -102,22 +112,39 @@ await postBlocks([
   ...R.pipe(
     weekOldPrs,
     R.toPairs,
-    R.map(([repo, prs]) => ({
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: `*${repo}:*\n${R.pipe(
-          prs,
-          R.map(
-            (pr) =>
-              `- <${pr.permalink}|${pr.title}> (${formatDistanceToNow(
-                parseISO(pr.updatedAt),
-                { locale: nb },
-              )})`,
-          ),
-          R.join("\n"),
-        )}`,
+    R.flatMap(([repo, prs]) => [
+      {
+        type: "header",
+        text: { type: "plain_text", text: `${repo}`, emoji: true },
       },
-    })),
+      ...prs.flatMap((pr) => [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `<${pr.permalink}|${pr.isDraft ? "Draft: " : ""}${
+              pr.title
+            }> (${formatDistanceToNow(parseISO(pr.updatedAt), {
+              locale: nb,
+            })} gammel)`,
+          },
+        },
+        {
+          type: "context",
+          elements: [
+            {
+              type: "image",
+              image_url: pr.author.avatarUrl,
+              alt_text: pr.author.login,
+            },
+            {
+              type: "plain_text",
+              text: `${pr.author.login}`,
+              emoji: true,
+            },
+          ],
+        },
+      ]),
+    ]),
   ),
 ]);
