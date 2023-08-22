@@ -16,5 +16,14 @@ export async function postBlocks(blocks: any[]) {
     }),
   });
 
-  console.log(result);
+  if (result.ok) {
+    console.info("Posted to Slack OK");
+    process.exit(0);
+  } else {
+    console.error(
+      `Failed to post to Slack, ${result.status} ${result.statusText}`,
+    );
+    console.error(result.text());
+    process.exit(1);
+  }
 }
