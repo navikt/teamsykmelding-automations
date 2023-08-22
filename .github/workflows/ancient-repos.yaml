@@ -2,7 +2,7 @@ name: Urørte repositories
 on:
   workflow_dispatch:
   schedule:
-    - cron: "15 8 * * 3"
+    - cron: '15 8 * * 3'
 env:
   NPM_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 jobs:

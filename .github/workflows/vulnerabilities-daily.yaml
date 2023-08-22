@@ -2,7 +2,7 @@ name: Gamle pull requests
 on:
   workflow_dispatch:
   schedule:
-    - cron: "03 07 * * *"
+    - cron: '03 07 * * *'
 env:
   NPM_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 jobs:
