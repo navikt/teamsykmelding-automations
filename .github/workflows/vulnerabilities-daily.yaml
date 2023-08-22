@@ -1,4 +1,4 @@
-name: Gamle pull requests
+name: Sjekk sårbarheter daglig for CRITICAL og HIGH
 on:
   workflow_dispatch:
   schedule:
@@ -6,7 +6,7 @@ on:
 env:
   NPM_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 jobs:
-  gamle-pull-requests:
+  sarbarheter-daglig:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
