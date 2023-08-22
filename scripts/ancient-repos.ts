@@ -1,5 +1,6 @@
 import * as R from "remeda";
-import { isBefore, parseISO, subMonths } from "date-fns";
+import { isBefore, parseISO, subMonths, formatDistanceToNow } from "date-fns";
+import { nb } from "date-fns/locale";
 import { octokit } from "./common/octokit.ts";
 import { postBlocks } from "./common/slack.ts";
 
@@ -47,6 +48,7 @@ async function getRepositories(
     })),
     R.filter((it) => isBefore(it.lastPush, threeMonthsAgo)),
     R.sortBy((it) => it.lastPush),
+    R.reverse(),
   );
 
   console.info(`Got ${repos.length} repositories for team ${team}`);
@@ -74,7 +76,14 @@ await postBlocks([
     type: "section",
     text: {
       type: "mrkdwn",
-      text: ancientRepos.map((it) => `- ${it.name}: ${it.url}`).join("\n"),
+      text: ancientRepos
+        .map(
+          (it) =>
+            `- <${it.url}|${it.name}> (${formatDistanceToNow(it.lastPush, {
+              locale: nb,
+            })})`,
+        )
+        .join("\n"),
     },
   },
 ]);
