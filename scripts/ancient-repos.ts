@@ -52,7 +52,6 @@ async function getRepositories(
   );
 
   console.info(`Got ${repos.length} repositories for team ${team}`);
-  console.log(repos);
 
   return repos;
 }
@@ -66,10 +65,11 @@ if (ancientRepos.length === 0) {
 
 await postBlocks([
   {
-    type: "section",
+    type: "header",
     text: {
-      type: "mrkdwn",
+      type: "plain_text",
       text: `Fant ${ancientRepos.length} repo som ikke har fått noen commits på 3 måneder. Noe som burde oppdateres eller arkiveres?`,
+      emoji: true,
     },
   },
   {
