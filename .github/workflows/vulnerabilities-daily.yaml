@@ -1,0 +1,19 @@
+name: Gamle pull requests
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "03 07 * * *"
+env:
+  NPM_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+jobs:
+  gamle-pull-requests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install --frozen-lockfile
+      - run: bun run scripts/risks.ts --levels=HIGH,CRITICAL
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          READER_TOKEN: ${{ secrets.READER_TOKEN }}

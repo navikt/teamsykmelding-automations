@@ -1,7 +1,7 @@
 const WEBHOOK_URL = Bun.env.SLACK_WEBHOOK_URL;
 
 if (!WEBHOOK_URL) {
-  console.error("READER_TOKEN is not set");
+  console.error("SLACK_WEBHOOK_URL is not set");
   process.exit(1);
 }
 
@@ -18,12 +18,12 @@ export async function postBlocks(blocks: any[]) {
 
   if (result.ok) {
     console.info("Posted to Slack OK");
-    process.exit(0);
+    //process.exit(0);
   } else {
     console.error(
       `Failed to post to Slack, ${result.status} ${result.statusText}`,
     );
-    console.error(result.text());
-    process.exit(1);
+    console.error(await result.text());
+    //process.exit(1);
   }
 }
