@@ -102,6 +102,17 @@ async function getVulnerabilities(team: string, levels: string[]) {
         team,
     })) as any
 
+    if (queryResult?.errors && queryResult?.errors.length > 0) {
+        console.error(queryResult.errors)
+        process.exit(1)
+    }
+
+    if (queryResult.organization.team == null) {
+        console.error(`No team found with slug ${team}, something missing access?`)
+        console.error(queryResult.errors)
+        process.exit(1)
+    }
+
     return R.pipe(
         queryResult.organization.team.repositories.nodes as RepoNodes[],
         R.filter((it) => !it.isArchived),
