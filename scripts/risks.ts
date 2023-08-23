@@ -201,13 +201,5 @@ if (!R.isEmpty(vulnerabilitiesByLevel)) {
         ),
     )
 } else {
-    await postBlocks([
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: `:cool_pepe: Ingen sårbarheter funnet på nivåene i dag ${levels.join(', ')} :cool_pepe:`,
-            },
-        },
-    ])
+    console.log("No vulnerabilities found, we're good!")
 }
