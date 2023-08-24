@@ -2,7 +2,7 @@
 
 Et sett med cron-jobber som sjekker diverse ting og sender påminnelser til #teamsymelding-påminnelser på slack.
 
-Liste over påminnelser og når de kjøres:
+Liste over påminnelser og når de kjøres (tidene er i UTC):
 
 <!-- COMPUTER SAYS DON'T TOUCH THIS START -->
 
