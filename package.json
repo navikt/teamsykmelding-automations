@@ -4,7 +4,9 @@
   "dependencies": {
     "date-fns": "^2.30.0",
     "octokit": "^3.1.0",
-    "remeda": "^1.25.0"
+    "remeda": "^1.25.0",
+    "rimraf": "^5.0.1",
+    "simple-git": "^3.19.1"
   },
   "devDependencies": {
     "@navikt/eslint-config-teamsykmelding": "^3.0.0",

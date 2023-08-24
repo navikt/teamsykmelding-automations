@@ -170,3 +170,8 @@ dist
 
 # idea
 .idea
+
+# my stuff
+.git-cache
+.fake-github-output
+.fake-github-summary
