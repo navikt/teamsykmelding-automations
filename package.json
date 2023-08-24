@@ -1,19 +1,30 @@
 {
-    "name": "teamsykmelding-slack-reminders",
-    "module": "index.ts",
-    "type": "module",
-    "dependencies": {
-        "date-fns": "^2.30.0",
-        "octokit": "^3.1.0",
-        "remeda": "^1.25.0"
-    },
-    "devDependencies": {
-        "@navikt/eslint-config-teamsykmelding": "^3.0.0",
-        "bun-types": "latest",
-        "prettier": "^3.0.2"
-    },
-    "peerDependencies": {
-        "typescript": "^5.0.0"
-    },
-    "prettier": "@navikt/eslint-config-teamsykmelding/prettier"
+  "name": "teamsykmelding-slack-reminders",
+  "type": "module",
+  "dependencies": {
+    "date-fns": "^2.30.0",
+    "octokit": "^3.1.0",
+    "remeda": "^1.25.0"
+  },
+  "devDependencies": {
+    "@navikt/eslint-config-teamsykmelding": "^3.0.0",
+    "@types/js-yaml": "^4.0.5",
+    "bun-types": "latest",
+    "cronstrue": "^2.31.0",
+    "glob": "^10.3.3",
+    "husky": "^8.0.0",
+    "js-yaml": "^4.1.0",
+    "pinst": "^3.0.0",
+    "prettier": "^3.0.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "prettier": "@navikt/eslint-config-teamsykmelding/prettier",
+  "scripts": {
+    "postinstall": "husky install && echo hello",
+    "prepack": "pinst --disable",
+    "postpack": "pinst --enable",
+    "update-readme": "bun run update-readme.ts"
+  }
 }
