@@ -8,7 +8,7 @@ type RepoNodes = {
     url: string
     codeowners: null | {
         errors: {
-            suggestion: string
+            message: string
         }[]
     }
 }
@@ -24,7 +24,7 @@ const getTeamReposQuery = /* GraphQL */ `
                         isArchived
                         codeowners {
                             errors {
-                                suggestion
+                                message
                             }
                         }
                     }
@@ -45,9 +45,13 @@ async function getReposWithCodeownerIssues(team: string): Promise<{ name: string
         queryResult.organization.team.repositories.nodes as RepoNodes[],
         R.filter((it) => !it.isArchived),
         R.filter((it) => it.codeowners == null || it.codeowners.errors.length > 0),
+        (it) => {
+            console.log(it)
+            return it
+        },
         R.map((repo) => ({
             name: repo.name,
-            error: repo.codeowners?.errors.map((it) => it.suggestion).join('\n') ?? 'Missing CODEOWNERS file',
+            error: repo.codeowners?.errors.map((it) => it.message).join('\n') ?? 'Missing CODEOWNERS file',
             url: repo.url,
         })),
     )
@@ -58,6 +62,8 @@ async function getReposWithCodeownerIssues(team: string): Promise<{ name: string
 }
 
 const codeownerlessRepos = await getReposWithCodeownerIssues('teamsykmelding')
+
+console.log(codeownerlessRepos)
 
 if (codeownerlessRepos.length === 0) {
     console.info('Found no repos with CODEOWNER issues')
@@ -77,7 +83,14 @@ await postBlocks([
         type: 'section',
         text: {
             type: 'mrkdwn',
-            text: codeownerlessRepos.map((it) => `- <${it.url}|${it.name}>: ${it.error}`).join('\n'),
+            text: codeownerlessRepos
+                .map(
+                    (it) =>
+                        `- <${it.url}|${it.name}>: ${
+                            it.error.includes('\n') ? `\`\`\`${it.error}\`\`\`` : `${it.error}`
+                        }`,
+                )
+                .join('\n'),
         },
     },
 ])
