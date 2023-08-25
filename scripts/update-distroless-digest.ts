@@ -3,14 +3,12 @@ import * as R from 'remeda'
 import { raise } from './common/utils.ts'
 import { postBlocks } from './common/slack.ts'
 import { createRepoGitClient, cloneOrPull, GIT_DIR } from './common/git.ts'
-
-const config = {
-    DISTROLESS_IMAGE: 'gcr.io/distroless/nodejs18-debian11',
-    RELEVANT_REPOS: ['syfosmmanuell', 'syk-dig', 'smregistrering', 'sykmeldinger', 'dinesykmeldte'] as const,
-}
+import { octokit } from './common/octokit.ts'
+import path from 'node:path'
 
 const hasNewDigestArg = Bun.argv.includes('--has-new-digest')
 const makeChangesArg = Bun.argv.includes('--make-changes')
+const image = Bun.argv.find((it) => it.startsWith('--image='))?.split('=')[1] ?? raise('Missing --image=<image> flag')
 
 if (!hasNewDigestArg && !makeChangesArg) {
     console.error('Missing --has-new-digest or --make-changes flag 😡')
@@ -21,6 +19,9 @@ if (hasNewDigestArg && makeChangesArg) {
     console.error("Can't pass both --has-new-digest and --make-changes flag at the same time you dumbo 😡")
     process.exit(1)
 }
+
+console.info(`Using image ${image}`)
+const relevantRepos: string[] = await getRelevantRepositories(image)
 
 if (hasNewDigestArg) {
     /**
@@ -38,7 +39,7 @@ if (hasNewDigestArg) {
             `The new digest is: \`${hasDigestChanged.digest}\`\n`,
             `There are ${hasDigestChanged.changedRepos} repos that needs the new digest`,
             `\n\n`,
-            `Visit [${config.DISTROLESS_IMAGE}](${config.DISTROLESS_IMAGE}) and verify that the digest is correct on the "latest" tag.`,
+            `Visit [${image}](${image}) and verify that the digest is correct on the "latest" tag.`,
         ])
 
         await postSlackUpdate(hasDigestChanged)
@@ -67,7 +68,7 @@ if (hasNewDigestArg) {
     await updateAllDockerfiles(digest)
 
     const changedRepos = await Promise.all(
-        config.RELEVANT_REPOS.map(async (repo) => {
+        relevantRepos.map(async (repo) => {
             const git = createRepoGitClient(repo)
             await git.add('Dockerfile')
             return git.commit(`automated: update distroless with newest digest`, ['--no-verify'])
@@ -76,7 +77,7 @@ if (hasNewDigestArg) {
     console.info(`Committed changes in ${changedRepos.length} repos`)
 
     const pushed = await Promise.all(
-        config.RELEVANT_REPOS.map(async (repo) => {
+        relevantRepos.map(async (repo) => {
             const git = createRepoGitClient(repo)
             const pushResult = await git.push()
             console.info(pushResult)
@@ -94,7 +95,7 @@ if (hasNewDigestArg) {
 export async function updateDockerfile(repo: string, hash: string) {
     const dockerfileFile = Bun.file(`${GIT_DIR}/${repo}/Dockerfile`)
     const content = await dockerfileFile.text()
-    const updatedContent = content.replace(/FROM(.*)\n/, `FROM ${config.DISTROLESS_IMAGE}@${hash}\n`)
+    const updatedContent = content.replace(/FROM(.*)\n/, `FROM ${image}@${hash}\n`)
 
     await Bun.write(dockerfileFile, updatedContent)
 
@@ -102,7 +103,7 @@ export async function updateDockerfile(repo: string, hash: string) {
 }
 
 async function updateAllDockerfiles(latestDigest: string) {
-    await Promise.all(config.RELEVANT_REPOS.map((repo) => updateDockerfile(repo, latestDigest)))
+    await Promise.all(relevantRepos.map((repo) => updateDockerfile(repo, latestDigest)))
 }
 
 async function updateReposAndDiff(): Promise<{ hasChanged: boolean; digest: string; changedRepos: number }> {
@@ -111,7 +112,7 @@ async function updateReposAndDiff(): Promise<{ hasChanged: boolean; digest: stri
     await updateAllDockerfiles(latestDigest)
     const anyGitFolderHasUnstagedChanges = (
         await Promise.all(
-            config.RELEVANT_REPOS.map((repo) => {
+            relevantRepos.map((repo) => {
                 const git = createRepoGitClient(repo)
                 return git.diffSummary()
             }),
@@ -129,7 +130,7 @@ async function updateReposAndDiff(): Promise<{ hasChanged: boolean; digest: stri
 }
 
 export async function getLatestDigestHash(): Promise<string> {
-    const process = Bun.spawnSync(['docker', 'manifest', 'inspect', `${config.DISTROLESS_IMAGE}:latest`])
+    const process = Bun.spawnSync(['docker', 'manifest', 'inspect', `${image}:latest`])
     const manifest = R.pipe(
         process,
         (it): any[] => JSON.parse(it.stdout.toString()).manifests,
@@ -144,7 +145,7 @@ export async function getLatestDigestHash(): Promise<string> {
 }
 
 async function cloneAllRepos() {
-    await Promise.all(config.RELEVANT_REPOS.map(cloneOrPull))
+    await Promise.all(relevantRepos.map(cloneOrPull))
 }
 
 function appendToFile(filename: string, lines: string[]) {
@@ -152,6 +153,53 @@ function appendToFile(filename: string, lines: string[]) {
     const writer = file.writer()
     lines.forEach((line) => writer.write(`${line}\n`))
     writer.flush()
+}
+
+async function getRelevantRepositories(image: string): Promise<string[]> {
+    const repoNodes: { name: string; isArchived: boolean }[] = (
+        (await octokit.graphql(
+            `query OurRepos($team: String!) {
+                organization(login: "navikt") {
+                    team(slug: $team) {
+                        repositories { nodes { name isArchived pushedAt url } }
+                    }
+                }
+            }`,
+            { team: 'teamsykmelding' },
+        )) as any
+    ).organization.team.repositories.nodes
+
+    const repositories: string[] = repoNodes.filter((it) => !it.isArchived).map((it: any) => it.name)
+
+    console.info(`Found ${repositories.length} non-archived repositories`)
+    await Promise.all(repositories.map(cloneOrPull))
+
+    const reposWithDockerfiles = await Promise.all(
+        repositories.map(async (repo): Promise<[string, string | null]> => {
+            const dockerfileFile = Bun.file(path.join(GIT_DIR, repo, 'Dockerfile'))
+            if (!(await dockerfileFile.exists())) {
+                console.info(`No Dockerfile found for ${repo}, skipping`)
+                return [repo, null]
+            }
+
+            const dockerfileImage = (await dockerfileFile.text()).match(/FROM (.*)\n/)
+
+            return [repo, dockerfileImage?.at(0) ?? null]
+        }),
+    )
+
+    return R.pipe(
+        reposWithDockerfiles,
+        R.filter(([, dockerfileImage]) => dockerfileImage != null),
+        R.filter(([repo, dockerfileImage]) => {
+            const relevantImage = dockerfileImage?.includes(image)
+            if (!relevantImage) {
+                console.info(`Skipping ${image} as it is not relevant for ${repo}`)
+            }
+            return relevantImage ?? false
+        }),
+        R.map(([repo]) => repo),
+    )
 }
 
 function postSlackUpdate(hasDigestChanged: {
@@ -164,7 +212,7 @@ function postSlackUpdate(hasDigestChanged: {
             type: 'header',
             text: {
                 type: 'plain_text',
-                text: `Ny distroless digest for ${config.DISTROLESS_IMAGE}!`,
+                text: `Ny distroless digest for ${image}!`,
                 emoji: true,
             },
         },
@@ -179,7 +227,7 @@ function postSlackUpdate(hasDigestChanged: {
             type: 'section',
             text: {
                 type: 'mrkdwn',
-                text: `Verifiser at denne versjonen er riktig på ${config.DISTROLESS_IMAGE} under "latest" tag`,
+                text: `Verifiser at denne versjonen er riktig på ${image} under "latest" tag`,
             },
         },
         {
