@@ -1,16 +1,12 @@
-import path from 'node:path'
-import * as fs from 'node:fs'
 import * as R from 'remeda'
-import simpleGit, { SimpleGit } from 'simple-git'
-import { rimraf } from 'rimraf'
 
 import { raise } from './common/utils.ts'
 import { postBlocks } from './common/slack.ts'
+import { createRepoGitClient, cloneOrPull, GIT_DIR } from './common/git.ts'
 
 const config = {
     DISTROLESS_IMAGE: 'gcr.io/distroless/nodejs18-debian11',
     RELEVANT_REPOS: ['syfosmmanuell', 'syk-dig', 'smregistrering', 'sykmeldinger', 'dinesykmeldte'] as const,
-    GIT_CACHE_DIR: path.join(process.cwd(), '.git-cache'),
 }
 
 const hasNewDigestArg = Bun.argv.includes('--has-new-digest')
@@ -26,20 +22,12 @@ if (hasNewDigestArg && makeChangesArg) {
     process.exit(1)
 }
 
-rimraf.sync(config.GIT_CACHE_DIR)
-fs.mkdirSync(config.GIT_CACHE_DIR, { recursive: true })
-const git = simpleGit({
-    baseDir: config.GIT_CACHE_DIR,
-    binary: 'git',
-    maxConcurrentProcesses: 10,
-})
-
 if (hasNewDigestArg) {
     /**
      * We're simply looking for changes in Dockerfile using the newest digest
      */
     await cloneAllRepos()
-    const hasDigestChanged = await getHasDigestChanged()
+    const hasDigestChanged = await updateReposAndDiff()
 
     appendToFile(Bun.env.GITHUB_OUTPUT ?? raise('GITHUB_OUTPUT env missing'), [
         `digest-changed=${hasDigestChanged.hasChanged}`,
@@ -103,20 +91,8 @@ if (hasNewDigestArg) {
     process.exit(1)
 }
 
-export function createRepoGitClient(repo: string): SimpleGit {
-    return simpleGit({
-        baseDir: `${config.GIT_CACHE_DIR}/${repo}`,
-        binary: 'git',
-        maxConcurrentProcesses: 1,
-        config: [
-            'user.email="github-actions[bot]@users.noreply.github.com"',
-            'user.name="teamsykmelding-automations[bot]"',
-        ],
-    })
-}
-
 export async function updateDockerfile(repo: string, hash: string) {
-    const dockerfileFile = Bun.file(`${config.GIT_CACHE_DIR}/${repo}/Dockerfile`)
+    const dockerfileFile = Bun.file(`${GIT_DIR}/${repo}/Dockerfile`)
     const content = await dockerfileFile.text()
     const updatedContent = content.replace(/FROM(.*)\n/, `FROM ${config.DISTROLESS_IMAGE}@${hash}\n`)
 
@@ -129,7 +105,7 @@ async function updateAllDockerfiles(latestDigest: string) {
     await Promise.all(config.RELEVANT_REPOS.map((repo) => updateDockerfile(repo, latestDigest)))
 }
 
-async function getHasDigestChanged(): Promise<{ hasChanged: boolean; digest: string; changedRepos: number }> {
+async function updateReposAndDiff(): Promise<{ hasChanged: boolean; digest: string; changedRepos: number }> {
     const latestDigest = await getLatestDigestHash()
 
     await updateAllDockerfiles(latestDigest)
@@ -168,16 +144,7 @@ export async function getLatestDigestHash(): Promise<string> {
 }
 
 async function cloneAllRepos() {
-    await Promise.all(config.RELEVANT_REPOS.map(cloneRepo))
-}
-
-async function cloneRepo(repo: string) {
-    const remote = `https://${Bun.env.READER_TOKEN}:x-oauth-basic@github.com/navikt/${repo}`
-
-    const t1 = performance.now()
-    await git.clone(remote, repo, { '--depth': 1 })
-
-    console.info(`Cloned ${repo} OK (${Math.round(performance.now() - t1)}ms))`)
+    await Promise.all(config.RELEVANT_REPOS.map(cloneOrPull))
 }
 
 function appendToFile(filename: string, lines: string[]) {
