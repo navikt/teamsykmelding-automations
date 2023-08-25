@@ -156,14 +156,7 @@ async function getRelevantRepositories(image: string): Promise<string[]> {
         )) as any
     ).organization.team.repositories.nodes
 
-    const repositories: string[] = repoNodes
-        .filter((it) => !it.isArchived)
-        .map((it: any): string => it.name)
-        .filter((it) => {
-            if (!image.includes('java')) return true
-
-            return it.includes('macgyver')
-        })
+    const repositories: string[] = repoNodes.filter((it) => !it.isArchived).map((it: any): string => it.name)
 
     console.info(`Found ${repositories.length} non-archived repositories`)
     await Promise.all(repositories.map(cloneOrPull))
@@ -188,7 +181,9 @@ async function getRelevantRepositories(image: string): Promise<string[]> {
         R.filter(([repo, dockerfileImage]) => {
             const relevantImage = dockerfileImage?.includes(image.replace('-debian11', ''))
             if (!relevantImage) {
-                console.info(`${image.replace('debian-11', '')} is not relevant for ${dockerfileImage?.trim()} (${repo})`)
+                console.info(
+                    `${image.replace('debian-11', '')} is not relevant for ${dockerfileImage?.trim()} (${repo})`,
+                )
             }
             return relevantImage ?? false
         }),
