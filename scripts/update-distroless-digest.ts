@@ -82,7 +82,6 @@ if (hasNewDigestArg) {
         relevantRepos.map(async (repo) => {
             const git = createRepoGitClient(repo)
             const pushResult = await git.push()
-            console.info(pushResult)
             return pushResult
         }),
     )
