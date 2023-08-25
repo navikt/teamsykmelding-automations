@@ -181,7 +181,7 @@ async function getRelevantRepositories(image: string): Promise<string[]> {
         R.filter(([repo, dockerfileImage]) => {
             const relevantImage = dockerfileImage?.includes(image)
             if (!relevantImage) {
-                console.info(`Skipping ${image} as it is not relevant for ${repo}`)
+                console.info(`${image} is not relevant for ${dockerfileImage?.trim()} (${repo})`)
             }
             return relevantImage ?? false
         }),

@@ -1,16 +1,19 @@
 import * as R from 'remeda'
 
 export async function getLatestDigestHash(image: string): Promise<string> {
-    const process = Bun.spawnSync(['docker', 'manifest', 'inspect', `${image}:latest`])
-    const manifest = R.pipe(
-        process,
-        (it): any[] => JSON.parse(it.stdout.toString()).manifests,
-        R.find((it) => it.platform.architecture === 'amd64'),
-    )
+    const process = Bun.spawnSync(['docker', 'manifest', 'inspect', '--verbose', `${image}:latest`])
+    const output: any | any[] = JSON.parse(process.stdout.toString())
 
-    if (manifest == null) {
+    let digest: string | null
+    if (Array.isArray(output)) {
+        digest = output.find((it) => it.Descriptor.platform.architecture === 'amd64').Descriptor.digest ?? null
+    } else {
+        digest = output.Descriptor.digest ?? null
+    }
+
+    if (digest == null) {
         throw new Error(`No manifest found: ${process.stderr?.toString() ?? 'No error'}`)
     }
 
-    return manifest.digest
+    return digest
 }
