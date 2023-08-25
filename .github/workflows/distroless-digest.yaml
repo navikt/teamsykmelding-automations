@@ -30,7 +30,7 @@ jobs:
     name: Update Dockerfiles and push to main
     runs-on: ubuntu-latest
     environment:
-      name: Approved distroless hash
+      name: Distroless frontend
     steps:
       - uses: actions/checkout@v3
       - uses: oven-sh/setup-bun@v1
