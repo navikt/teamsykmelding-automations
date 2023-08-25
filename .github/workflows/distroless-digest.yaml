@@ -15,7 +15,7 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: 0.8.1
-      - run: bun install --frozen-lockfile --production
+      - run: bun install --production
       - id: new-digest
         run: bun run scripts/update-distroless-digest.ts --has-new-digest --image=${{ env.DISTROLESS_IMAGE }}
         env:
@@ -36,7 +36,7 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: 0.8.1
-      - run: bun install --frozen-lockfile --production
+      - run: bun install --production
       - run: bun run scripts/update-distroless-digest.ts --make-changes --image=${{ env.DISTROLESS_IMAGE }} --digest=${{ needs.digest-changed.outputs.digest }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

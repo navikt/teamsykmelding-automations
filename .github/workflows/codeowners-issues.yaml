@@ -14,7 +14,7 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: 0.8.1
-      - run: bun install --frozen-lockfile --production
+      - run: bun install --production
       - run: bun run scripts/codeownerless-repos.ts
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

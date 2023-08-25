@@ -24,7 +24,7 @@
   },
   "prettier": "@navikt/eslint-config-teamsykmelding/prettier",
   "scripts": {
-    "postinstall": "husky install && echo hello",
+    "postinstall": "bun run postinstall.ts",
     "prepack": "pinst --disable",
     "postpack": "pinst --enable",
     "update-readme": "bun run update-readme.ts"
