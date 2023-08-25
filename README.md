@@ -6,7 +6,8 @@ Liste over påminnelser og når de kjøres (tidene er i UTC):
 
 <!-- COMPUTER SAYS DON'T TOUCH THIS START -->
 
-- **Automatisk oppdatering av distroless digest** | Kl.06:30, på mandag
+- **Automatisk oppdatering av distroless digest for backendapper** | Kl.06:45, på mandag
+- **Automatisk oppdatering av distroless digest for frontendapper** | Kl.06:30, på mandag
 - **Gamle pull requests** | Kl.10:15, på tirsdag og fredag
 - **Repos med feil i CODEOWNERS** | Kl.06:45, på torsdag
 - **Sjekk sårbarheter daglig for CRITICAL og HIGH** | Kl.07:03, hver dag

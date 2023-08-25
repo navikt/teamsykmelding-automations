@@ -1,14 +1,14 @@
-name: Automatisk oppdatering av distroless digest for frontendapper
+name: Automatisk oppdatering av distroless digest for backendapper
 on:
   workflow_dispatch:
   schedule:
-    - cron: '30 6 * * 1'
+    - cron: '45 6 * * 1'
 env:
   NPM_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
-  DISTROLESS_IMAGE: gcr.io/distroless/nodejs18-debian11
+  DISTROLESS_IMAGE: gcr.io/distroless/java17-debian11
 jobs:
   digest-changed:
-    name: Fetch new digest for distroless images i frontend repos
+    name: Fetch new digest for distroless images i backend repos
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
