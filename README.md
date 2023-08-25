@@ -1,6 +1,6 @@
-# teamsykmelding-slack-reminders
+# teamsykmelding-automations
 
-Et sett med cron-jobber som sjekker diverse ting og sender påminnelser til #teamsymelding-påminnelser på slack.
+Et sett med cron-jobber som sjekker diverse ting og sender påminnelser til #teamsymelding-påminnelser på slack og andre automatiseringer.
 
 Liste over påminnelser og når de kjøres (tidene er i UTC):
 
