@@ -2,9 +2,10 @@ import * as R from 'remeda'
 
 import { raise } from './common/utils.ts'
 import { postBlocks } from './common/slack.ts'
-import { createRepoGitClient, cloneOrPull, GIT_DIR } from './common/git.ts'
+import { cloneOrPull, createRepoGitClient, GIT_DIR } from './common/git.ts'
 import { octokit } from './common/octokit.ts'
 import path from 'node:path'
+import { getLatestDigestHash } from './common/docker.ts'
 
 const hasNewDigestArg = Bun.argv.includes('--has-new-digest')
 const makeChangesArg = Bun.argv.includes('--make-changes')
@@ -28,7 +29,8 @@ if (hasNewDigestArg) {
      * We're simply looking for changes in Dockerfile using the newest digest
      */
     await cloneAllRepos()
-    const hasDigestChanged = await updateReposAndDiff()
+    const latestDigest = await getLatestDigestHash(image)
+    const hasDigestChanged = await updateReposAndDiff(latestDigest)
 
     appendToFile(Bun.env.GITHUB_OUTPUT ?? raise('GITHUB_OUTPUT env missing'), [
         `digest-changed=${hasDigestChanged.hasChanged}`,
@@ -106,9 +108,9 @@ async function updateAllDockerfiles(latestDigest: string) {
     await Promise.all(relevantRepos.map((repo) => updateDockerfile(repo, latestDigest)))
 }
 
-async function updateReposAndDiff(): Promise<{ hasChanged: boolean; digest: string; changedRepos: number }> {
-    const latestDigest = await getLatestDigestHash()
-
+async function updateReposAndDiff(
+    latestDigest: string,
+): Promise<{ hasChanged: boolean; digest: string; changedRepos: number }> {
     await updateAllDockerfiles(latestDigest)
     const anyGitFolderHasUnstagedChanges = (
         await Promise.all(
@@ -127,21 +129,6 @@ async function updateReposAndDiff(): Promise<{ hasChanged: boolean; digest: stri
 
     console.info('No digests changed')
     return { hasChanged: false, digest: latestDigest, changedRepos: 0 }
-}
-
-export async function getLatestDigestHash(): Promise<string> {
-    const process = Bun.spawnSync(['docker', 'manifest', 'inspect', `${image}:latest`])
-    const manifest = R.pipe(
-        process,
-        (it): any[] => JSON.parse(it.stdout.toString()).manifests,
-        R.find((it) => it.platform.architecture === 'amd64'),
-    )
-
-    if (manifest == null) {
-        throw new Error(`No manifest found: ${process.stderr?.toString() ?? 'No error'}`)
-    }
-
-    return manifest.digest
 }
 
 async function cloneAllRepos() {
