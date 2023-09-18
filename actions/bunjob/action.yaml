@@ -1,0 +1,21 @@
+name: 'Setup bun & install cache'
+description: 'Installs bun and installs dependencies using bun'
+
+inputs:
+  NPM_AUTH_TOKEN:
+    required: true
+    description: 'NPM auth token for GPR packages'
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v3
+    - uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: 1.0.2
+    - id: set-env
+      shell: bash
+      run: echo "NPM_AUTH_TOKEN=${{ inputs.NPM_AUTH_TOKEN }}" >> $GITHUB_ENV
+    - id: bun-install
+      shell: bash
+      run: bun install --production
