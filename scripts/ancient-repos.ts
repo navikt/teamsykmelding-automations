@@ -15,7 +15,7 @@ const getTeamReposQuery = /* GraphQL */ `
     query OurRepos($team: String!) {
         organization(login: "navikt") {
             team(slug: $team) {
-                repositories {
+                repositories(orderBy: { field: PUSHED_AT, direction: DESC }) {
                     nodes {
                         name
                         isArchived

@@ -147,7 +147,9 @@ async function getRelevantRepositories(image: string): Promise<string[]> {
             `query OurRepos($team: String!) {
                 organization(login: "navikt") {
                     team(slug: $team) {
-                        repositories { nodes { name isArchived pushedAt url } }
+                        repositories(orderBy: {field: PUSHED_AT, direction: DESC}) {
+                            nodes { name isArchived pushedAt url }
+                        }
                     }
                 }
             }`,

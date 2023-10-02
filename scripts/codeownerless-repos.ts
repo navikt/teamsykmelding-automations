@@ -17,7 +17,7 @@ const getTeamReposQuery = /* GraphQL */ `
     query ReposWithCodeowners($team: String!) {
         organization(login: "navikt") {
             team(slug: $team) {
-                repositories {
+                repositories(orderBy: { field: PUSHED_AT, direction: DESC }) {
                     nodes {
                         name
                         url
