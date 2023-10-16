@@ -13,7 +13,7 @@ function getBumper(): string {
 
 const ignoredRepos = ['diagnosekoder']
 
-async function getRelevantRepos(): Promise<[string, string][]> {
+async function getRelevantRepos(): Promise<[string, string, number][]> {
     const reposQuery = /* GraphQL */ `
         query {
             organization(login: "navikt") {
@@ -25,6 +25,14 @@ async function getRelevantRepos(): Promise<[string, string][]> {
                             url
                             primaryLanguage {
                                 name
+                            }
+                            pullRequests(first: 10, orderBy: { field: UPDATED_AT, direction: DESC }, states: OPEN) {
+                                nodes {
+                                    author {
+                                        avatarUrl
+                                        login
+                                    }
+                                }
                             }
                         }
                     }
@@ -39,6 +47,7 @@ async function getRelevantRepos(): Promise<[string, string][]> {
             url: string
             isArchived: true
             primaryLanguage?: { name: string }
+            pullRequests: { nodes: { author: { login: string } }[] }
         }[],
         R.filter((it) => !it.isArchived),
         R.filter((it) => !ignoredRepos.includes(it.name)),
@@ -46,10 +55,13 @@ async function getRelevantRepos(): Promise<[string, string][]> {
         R.pick(['TypeScript', 'JavaScript']),
         R.values,
         R.flatten(),
-        R.map((it): [string, string] => [it.name, it.url]),
+        R.map((it): [string, string, number] => [
+            it.name,
+            it.url,
+            it.pullRequests.nodes.filter((pr) => pr.author.login.includes('dependabot')).length,
+        ]),
+        R.sortBy([(it) => it[2], 'desc']),
     )
-
-    console.log(relevantRepos)
 
     return relevantRepos
 }
@@ -77,7 +89,12 @@ async function postBumper() {
             type: 'section',
             text: {
                 type: 'mrkdwn',
-                text: repos.map(([name, url]) => `- <${url}|${name}>`).join('\n'),
+                text: repos
+                    .map(
+                        ([name, url, prs]) =>
+                            `- <${url}|${name}> ${prs > 0 ? `(${prs} åpne dependabot PR-er)` : ':github-check-mark:'} `,
+                    )
+                    .join('\n'),
             },
         },
     ]
