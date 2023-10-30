@@ -2,7 +2,7 @@ name: Backend dependency ansvarlig
 on:
   workflow_dispatch:
   schedule:
-    - cron: '15 09 * * 1'
+    - cron: '15 10 * * 1'
 
 jobs:
   frontend-bumper:
@@ -11,7 +11,7 @@ jobs:
       - uses: navikt/teamsykmelding-automations/actions/bunjob@main
         with:
           NPM_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
-      - run: bun run scripts/frontend-bumpers.ts
+      - run: bun run scripts/backendend-bumper.yaml
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           READER_TOKEN: ${{ secrets.READER_TOKEN }}
