@@ -5,7 +5,7 @@ on:
     - cron: '15 06 * * 1'
 
 jobs:
-  frontend-bumper:
+  weekly-guard:
     runs-on: ubuntu-latest
     steps:
       - uses: navikt/teamsykmelding-automations/actions/bunjob@main
