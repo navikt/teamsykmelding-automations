@@ -3,14 +3,13 @@ import { getWeek } from 'date-fns'
 import { octokit } from './common/octokit.ts'
 import { postBlocks } from './common/slack.ts'
 
-const bumpers = ['jaflaten', 'helehar', 'MikAoJk', 'andreasDev']
+const bumpers = ['MikAoJk', 'helehar', 'jaflaten', 'andreasDev']
 
 function getBumper(): string {
     const weekNumber = getWeek(new Date()) + 1
 
     return bumpers[weekNumber % bumpers.length]
 }
-
 
 async function getRelevantRepos(): Promise<[string, string, number][]> {
     const reposQuery = /* GraphQL */ `
@@ -67,6 +66,7 @@ async function getRelevantRepos(): Promise<[string, string, number][]> {
 async function postBumper() {
     const repos = await getRelevantRepos()
     const bumper = getBumper()
+    const partitionedRepos = R.chunk(repos, 10)
 
     const blocks = [
         {
@@ -83,18 +83,22 @@ async function postBumper() {
                 text: `Aktive backend-repoer:`,
             },
         },
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: repos
-                    .map(
-                        ([name, url, prs]) =>
-                            `- <${url}|${name}> ${prs > 0 ? `(${prs} åpne dependabot PR-er)` : ':github-check-mark:'} `,
-                    )
-                    .join('\n'),
+        ...partitionedRepos.flatMap((repos) => [
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: repos
+                        .map(
+                            ([name, url, prs]) =>
+                                `- <${url}|${name}> ${
+                                    prs > 0 ? `(${prs} åpne dependabot PR-er)` : ':github-check-mark:'
+                                } `,
+                        )
+                        .join('\n'),
+                },
             },
-        },
+        ]),
     ]
 
     await postBlocks(blocks)
