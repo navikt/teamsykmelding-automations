@@ -1,15 +1,7 @@
 import * as R from 'remeda'
-import { getWeek } from 'date-fns'
 import { octokit } from './common/octokit.ts'
 import { postBlocks } from './common/slack.ts'
-
-const bumpers = ['nuranes', 'karl-run']
-
-function getBumper(): string {
-    const weekNumber = getWeek(new Date()) + 1
-
-    return bumpers[weekNumber % bumpers.length]
-}
+import { getFrontendBumperForOddWeeksOnly } from './common/bumper.ts'
 
 const ignoredRepos = ['diagnosekoder']
 
@@ -68,14 +60,18 @@ async function getRelevantRepos(): Promise<[string, string, number][]> {
 
 async function postBumper() {
     const repos = await getRelevantRepos()
-    const bumper = getBumper()
+    const bumper = getFrontendBumperForOddWeeksOnly(new Date())
+
+    if (bumper == null) {
+        console.info('Skipping this week, crontab doesnt support biweekly')
+    }
 
     const blocks = [
         {
             type: 'section',
             text: {
                 type: 'mrkdwn',
-                text: `:pepejam: Ukens frontend-dependency-ansvarlig er <https://github.com/${getBumper()}|${getBumper()}> :pepejam:`,
+                text: `:pepejam: Ukens frontend-dependency-ansvarlig er <https://github.com/${bumper}|${bumper}> :pepejam:`,
             },
         },
         {
