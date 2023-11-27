@@ -59,12 +59,14 @@ async function getRelevantRepos(): Promise<[string, string, number][]> {
 }
 
 async function postBumper() {
-    const repos = await getRelevantRepos()
     const bumper = getFrontendBumperForOddWeeksOnly(new Date())
 
     if (bumper == null) {
         console.info('Skipping this week, crontab doesnt support biweekly')
+        return
     }
+
+    const repos = await getRelevantRepos()
 
     const blocks = [
         {
