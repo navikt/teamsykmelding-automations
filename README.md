@@ -7,7 +7,6 @@ Liste over påminnelser og når de kjøres (tidene er i UTC):
 <!-- COMPUTER SAYS DON'T TOUCH THIS START -->
 
 - **Automatisk oppdatering av distroless digest for backendapper** | Kl.06:45, på mandag
-- **Automatisk oppdatering av distroless digest for frontendapper** | Kl.06:30, på mandag
 - **Automatisk oppdatering av distroless digest for frontendapper (node 20)** | Kl.06:30, på mandag
 - **Backend dependency ansvarlig** | Kl.07:15, på mandag
 - **Frontend dependency ansvarlig** | Kl.06:15, på mandag
