@@ -34,6 +34,8 @@ const getTeamReposQuery = /* GraphQL */ `
     }
 `
 
+const ignoredRepos = ['vault-iac']
+
 async function getReposWithCodeownerIssues(team: string): Promise<{ name: string; url: string; error: string }[]> {
     console.info(`Repos without codeowners for team ${team}`)
 
@@ -43,6 +45,7 @@ async function getReposWithCodeownerIssues(team: string): Promise<{ name: string
 
     const repos = R.pipe(
         queryResult.organization.team.repositories.nodes as RepoNodes[],
+        R.filter((it) => !ignoredRepos.includes(it.name)),
         R.filter((it) => !it.isArchived),
         R.filter((it) => it.codeowners == null || it.codeowners.errors.length > 0),
         (it) => {
