@@ -2,7 +2,7 @@
   "name": "teamsykmelding-slack-reminders",
   "type": "module",
   "dependencies": {
-    "date-fns": "^2.30.0",
+    "date-fns": "^3.3.1",
     "octokit": "^3.1.0",
     "remeda": "^1.25.0",
     "rimraf": "^5.0.1",
@@ -14,7 +14,7 @@
     "bun-types": "^1.0.11",
     "cronstrue": "^2.31.0",
     "glob": "^10.3.3",
-    "husky": "^8.0.0",
+    "husky": "^9.0.11",
     "js-yaml": "^4.1.0",
     "pinst": "^3.0.0",
     "prettier": "^3.0.2"
@@ -24,7 +24,7 @@
   },
   "prettier": "@navikt/eslint-config-teamsykmelding/prettier",
   "scripts": {
-    "postinstall": "bun run postinstall.ts",
+    "prepare": "husky install",
     "prepack": "pinst --disable",
     "postpack": "pinst --enable",
     "update-readme": "bun run update-readme.ts"

@@ -1,5 +1,5 @@
 import * as R from 'remeda'
-import { isBefore, parseISO, subMonths, formatDistanceToNow, subDays } from 'date-fns'
+import { isBefore, parseISO, formatDistanceToNow, subDays } from 'date-fns'
 import { nb } from 'date-fns/locale'
 import { blacklisted, octokit } from './common/octokit.ts'
 import { postBlocks } from './common/slack.ts'
