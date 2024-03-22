@@ -30,11 +30,9 @@ jobs:
     environment:
       name: Distroless frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: navikt/teamsykmelding-automations/actions/bunjob@main
         with:
-          bun-version: 1.0.2
-      - run: bun install --production
+          NPM_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - run: bun run scripts/update-distroless-digest.ts --make-changes --image=${{ env.DISTROLESS_IMAGE }} --digest=${{ needs.digest-changed.outputs.digest }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
