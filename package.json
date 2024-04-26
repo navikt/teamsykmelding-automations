@@ -17,10 +17,8 @@
     "husky": "^9.0.11",
     "js-yaml": "^4.1.0",
     "pinst": "^3.0.0",
-    "prettier": "^3.2.5"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "prettier": "@navikt/eslint-config-teamsykmelding/prettier",
   "scripts": {

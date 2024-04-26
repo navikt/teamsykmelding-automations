@@ -1,7 +1,6 @@
 import * as R from 'remeda'
 import { octokit } from './common/octokit.ts'
 import { postBlocks } from './common/slack.ts'
-import { getFrontendBumperForOddWeeksOnly } from './common/bumper.ts'
 
 const ignoredRepos = ['diagnosekoder']
 
@@ -33,20 +32,22 @@ async function getRelevantRepos(): Promise<[string, string, number][]> {
         }
     `
     const queryResult = (await octokit.graphql(reposQuery)) as any
+    const nodes: {
+        name: string
+        url: string
+        isArchived: true
+        primaryLanguage?: { name: string }
+        pullRequests: { nodes: { author: { login: string } }[] }
+    }[] = queryResult.organization.team.repositories.nodes
+
     const relevantRepos = R.pipe(
-        queryResult.organization.team.repositories.nodes as {
-            name: string
-            url: string
-            isArchived: true
-            primaryLanguage?: { name: string }
-            pullRequests: { nodes: { author: { login: string } }[] }
-        }[],
+        nodes,
         R.filter((it) => !it.isArchived),
         R.filter((it) => !ignoredRepos.includes(it.name)),
         R.groupBy((it) => it.primaryLanguage?.name ?? 'unknown'),
         R.pick(['TypeScript', 'JavaScript']),
         R.values,
-        R.flatten(),
+        R.flat(),
         R.map((it): [string, string, number] => [
             it.name,
             it.url,
@@ -59,13 +60,6 @@ async function getRelevantRepos(): Promise<[string, string, number][]> {
 }
 
 async function postBumper() {
-    const bumper = getFrontendBumperForOddWeeksOnly(new Date())
-
-    if (bumper == null) {
-        console.info('Skipping this week, crontab doesnt support biweekly')
-        return
-    }
-
     const repos = await getRelevantRepos()
 
     const blocks = [
@@ -73,26 +67,7 @@ async function postBumper() {
             type: 'section',
             text: {
                 type: 'mrkdwn',
-                text: `:pepejam: Ukens frontend-dependency-ansvarlig er <https://github.com/${bumper}|${bumper}> :pepejam:`,
-            },
-        },
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: `Aktive frontend-repoer:`,
-            },
-        },
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: repos
-                    .map(
-                        ([name, url, prs]) =>
-                            `- <${url}|${name}> ${prs > 0 ? `(${prs} åpne dependabot PR-er)` : ':github-check-mark:'} `,
-                    )
-                    .join('\n'),
+                text: `:pepejam: Denne uka er det ${repos.length} frontend repos som har totalt ${R.sumBy(repos, ([repo, url, prs]) => prs)} dependabot PR-er :pepejam:`,
             },
         },
     ]

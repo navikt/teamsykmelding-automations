@@ -1,15 +1,6 @@
 import * as R from 'remeda'
-import { getWeek } from 'date-fns'
 import { octokit } from './common/octokit.ts'
 import { postBlocks } from './common/slack.ts'
-
-const bumpers = ['MikAoJk', 'helehar', 'jaflaten', 'andreasDev']
-
-function getBumper(): string {
-    const weekNumber = getWeek(new Date()) + 1
-
-    return bumpers[weekNumber % bumpers.length]
-}
 
 async function getRelevantRepos(): Promise<[string, string, number][]> {
     const reposQuery = /* GraphQL */ `
@@ -51,7 +42,7 @@ async function getRelevantRepos(): Promise<[string, string, number][]> {
         R.groupBy((it) => it.primaryLanguage?.name ?? 'unknown'),
         R.pick(['Kotlin', 'Rust']),
         R.values,
-        R.flatten(),
+        R.flat(),
         R.map((it): [string, string, number] => [
             it.name,
             it.url,
@@ -65,40 +56,15 @@ async function getRelevantRepos(): Promise<[string, string, number][]> {
 
 async function postBumper() {
     const repos = await getRelevantRepos()
-    const bumper = getBumper()
-    const partitionedRepos = R.chunk(repos, 10)
 
     const blocks = [
         {
             type: 'section',
             text: {
                 type: 'mrkdwn',
-                text: `:pepejam: Ukens backend-dependency-ansvarlig er <https://github.com/${bumper}|${bumper}> :pepejam:`,
+                text: `:pepejam: Denne uka er det ${repos.length} backend repos som har totalt ${R.sumBy(repos, ([_, __, prs]) => prs)} dependabot PR-er :pepejam:`,
             },
         },
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: `Aktive backend-repoer:`,
-            },
-        },
-        ...partitionedRepos.flatMap((repos) => [
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: repos
-                        .map(
-                            ([name, url, prs]) =>
-                                `- <${url}|${name}> ${
-                                    prs > 0 ? `(${prs} åpne dependabot PR-er)` : ':github-check-mark:'
-                                } `,
-                        )
-                        .join('\n'),
-                },
-            },
-        ]),
     ]
 
     await postBlocks(blocks)
