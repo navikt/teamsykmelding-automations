@@ -1,17 +1,17 @@
-name: Backend dependency ansvarlig
+name: Info om frontend dependabot PR-er
 on:
   workflow_dispatch:
   schedule:
     - cron: '15 07 * * 1'
 
 jobs:
-  backend-bumper:
+  frontend-bumper:
     runs-on: ubuntu-latest
     steps:
       - uses: navikt/teamsykmelding-automations/actions/bunjob@main
         with:
           NPM_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
-      - run: bun run scripts/backend-bumpers.ts
+      - run: bun run scripts/deps-frontend.ts
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           READER_TOKEN: ${{ secrets.READER_TOKEN }}
