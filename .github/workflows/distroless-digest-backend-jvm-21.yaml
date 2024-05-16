@@ -1,14 +1,14 @@
-name: "Frontend (node 20): Oppdatering av distroless digest"
+name: "Backend (Java 21): Oppdatering av distroless digest"
 on:
   workflow_dispatch:
   schedule:
-    - cron: '30 6 * * 1'
+    - cron: '45 6 * * 1'
 env:
-  DISTROLESS_IMAGE: gcr.io/distroless/nodejs20-debian11
+  DISTROLESS_IMAGE: gcr.io/distroless/java21-debian12
 
 jobs:
   digest-changed:
-    name: Fetch new digest for distroless images i frontend repos
+    name: Fetch new digest for distroless images i backend repos
     runs-on: ubuntu-latest
     steps:
       - uses: navikt/teamsykmelding-automations/actions/bunjob@main
@@ -28,11 +28,9 @@ jobs:
     name: Update Dockerfiles and push to main
     runs-on: ubuntu-latest
     environment:
-      name: Distroless frontend
+      name: Distroless backend
     steps:
       - uses: navikt/teamsykmelding-automations/actions/bunjob@main
-        with:
-          NPM_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - run: bun run scripts/update-distroless-digest.ts --make-changes --image=${{ env.DISTROLESS_IMAGE }} --digest=${{ needs.digest-changed.outputs.digest }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

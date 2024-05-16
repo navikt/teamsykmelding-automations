@@ -1,30 +1,31 @@
 {
-  "name": "teamsykmelding-slack-reminders",
-  "type": "module",
-  "dependencies": {
-    "date-fns": "^3.6.0",
-    "octokit": "^3.2.0",
-    "remeda": "^1.61.0",
-    "rimraf": "^5.0.5",
-    "simple-git": "^3.24.0"
-  },
-  "devDependencies": {
-    "@navikt/eslint-config-teamsykmelding": "^6.1.0",
-    "@types/js-yaml": "^4.0.9",
-    "bun-types": "^1.1.5",
-    "cronstrue": "^2.49.0",
-    "glob": "^10.3.12",
-    "husky": "^9.0.11",
-    "js-yaml": "^4.1.0",
-    "pinst": "^3.0.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
-  },
-  "prettier": "@navikt/eslint-config-teamsykmelding/prettier",
-  "scripts": {
-    "prepare": "husky install",
-    "prepack": "pinst --disable",
-    "postpack": "pinst --enable",
-    "update-readme": "bun run update-readme.ts"
-  }
+    "name": "teamsykmelding-slack-reminders",
+    "type": "module",
+    "dependencies": {
+        "date-fns": "^3.6.0",
+        "octokit": "^3.2.0",
+        "remeda": "^1.61.0",
+        "rimraf": "^5.0.5",
+        "simple-git": "^3.24.0"
+    },
+    "devDependencies": {
+        "@navikt/eslint-config-teamsykmelding": "^6.1.0",
+        "@types/js-yaml": "^4.0.9",
+        "bun-types": "^1.1.5",
+        "cronstrue": "^2.49.0",
+        "glob": "^10.3.12",
+        "husky": "^9.0.11",
+        "js-yaml": "^4.1.0",
+        "pinst": "^3.0.0",
+        "prettier": "^3.2.5",
+        "typescript": "^5.4.5"
+    },
+    "prettier": "@navikt/eslint-config-teamsykmelding/prettier",
+    "scripts": {
+        "prepare": "husky install",
+        "prepack": "pinst --disable",
+        "postpack": "pinst --enable",
+        "update-readme": "bun run update-readme.ts",
+        "postinstall": "prettier -w package.json"
+    }
 }

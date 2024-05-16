@@ -1,8 +1,7 @@
-import * as R from 'remeda'
+import { $ } from 'bun'
 
 export async function getLatestDigestHash(image: string): Promise<string> {
-    const process = Bun.spawnSync(['docker', 'manifest', 'inspect', '--verbose', `${image}:latest`])
-    const output: any | any[] = JSON.parse(process.stdout.toString())
+    const output = await $`docker manifest inspect --verbose ${image}:latest`.quiet().throws(true).json()
 
     let digest: string | null
     if (Array.isArray(output)) {

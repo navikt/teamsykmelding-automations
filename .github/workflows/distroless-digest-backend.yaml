@@ -1,4 +1,4 @@
-name: Automatisk oppdatering av distroless digest for backendapper
+name: "Backend (Java 17): Oppdatering av distroless digest"
 on:
   workflow_dispatch:
   schedule:
