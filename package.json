@@ -25,7 +25,6 @@
         "prepare": "husky install",
         "prepack": "pinst --disable",
         "postpack": "pinst --enable",
-        "update-readme": "bun run update-readme.ts",
-        "postinstall": "prettier -w package.json"
+        "update-readme": "bun run update-readme.ts"
     }
 }
