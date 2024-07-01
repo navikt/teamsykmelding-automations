@@ -4,7 +4,7 @@
     "dependencies": {
         "date-fns": "^3.6.0",
         "octokit": "^3.2.0",
-        "remeda": "^1.61.0",
+        "remeda": "^2.2.1",
         "rimraf": "^5.0.5",
         "simple-git": "^3.24.0"
     },
