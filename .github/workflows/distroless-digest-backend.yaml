@@ -31,6 +31,8 @@ jobs:
       name: Distroless backend
     steps:
       - uses: navikt/teamsykmelding-automations/actions/bunjob@main
+        with:
+          NPM_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - run: bun run scripts/update-distroless-digest.ts --make-changes --image=${{ env.DISTROLESS_IMAGE }} --digest=${{ needs.digest-changed.outputs.digest }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
