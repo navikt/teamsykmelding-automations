@@ -22,7 +22,7 @@
     },
     "prettier": "@navikt/eslint-config-teamsykmelding/prettier",
     "scripts": {
-        "prepare": "husky install",
+        "prepare": "husky",
         "prepack": "pinst --disable",
         "postpack": "pinst --enable",
         "update-readme": "bun run update-readme.ts"
