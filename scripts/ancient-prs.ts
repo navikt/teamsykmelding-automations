@@ -95,7 +95,7 @@ await postBlocks([
     },
     ...R.pipe(
         weekOldPrs,
-        R.toPairs,
+        R.entries(),
         R.flatMap(([repo, prs]) => [
             {
                 type: 'header',

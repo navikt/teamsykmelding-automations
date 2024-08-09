@@ -46,7 +46,7 @@ async function getRelevantRepos(): Promise<[string, string, number][]> {
         R.filter((it) => !ignoredRepos.includes(it.name)),
         R.groupBy((it) => it.primaryLanguage?.name ?? 'unknown'),
         R.pick(['TypeScript', 'JavaScript']),
-        R.values,
+        R.values(),
         R.flat(),
         R.map((it): [string, string, number] => [
             it.name,

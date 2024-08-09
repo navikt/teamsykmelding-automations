@@ -167,7 +167,7 @@ if (!R.isEmpty(vulnerabilitiesByLevel)) {
     await postBlocks(
         R.pipe(
             vulnerabilitiesByLevel,
-            R.toPairs,
+            R.entries(),
             R.flatMap(([level, apps]) => [
                 {
                     type: 'header',
@@ -179,7 +179,7 @@ if (!R.isEmpty(vulnerabilitiesByLevel)) {
                 },
                 ...R.pipe(
                     apps,
-                    R.toPairs,
+                    R.entries(),
                     R.flatMap(([app, vulns]) => [
                         {
                             type: 'section',

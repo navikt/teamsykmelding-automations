@@ -41,7 +41,7 @@ async function getRelevantRepos(): Promise<[string, string, number][]> {
         R.filter((it) => !it.isArchived),
         R.groupBy((it) => it.primaryLanguage?.name ?? 'unknown'),
         R.pick(['Kotlin', 'Rust']),
-        R.values,
+        R.values(),
         R.flat(),
         R.map((it): [string, string, number] => [
             it.name,
