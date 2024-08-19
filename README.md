@@ -6,7 +6,6 @@ Liste over påminnelser og når de kjøres (tidene er i UTC):
 
 <!-- COMPUTER SAYS DON'T TOUCH THIS START -->
 
-- **Backend (Java 17): Oppdatering av distroless digest** | Kl.06:45, på mandag
 - **Backend (Java 21): Oppdatering av distroless digest** | Kl.06:45, på mandag
 - **Frontend (node 20): Oppdatering av distroless digest** | Kl.06:30, på mandag
 - **Gamle pull requests** | Kl.10:15, på tirsdag og fredag
