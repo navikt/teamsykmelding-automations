@@ -12,7 +12,7 @@ runs:
     - uses: actions/checkout@v4
     - uses: oven-sh/setup-bun@v1
       with:
-        bun-version: 1.1.22
+        bun-version: 1.1.24
     - id: set-env
       shell: bash
       run: echo "NPM_AUTH_TOKEN=${{ inputs.NPM_AUTH_TOKEN }}" >> $GITHUB_ENV
