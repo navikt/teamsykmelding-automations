@@ -2,7 +2,7 @@
     "name": "teamsykmelding-slack-reminders",
     "type": "module",
     "dependencies": {
-        "date-fns": "^3.6.0",
+        "date-fns": "^4.1.0",
         "octokit": "^4.0.2",
         "remeda": "^2.11.0",
         "rimraf": "^6.0.1",
