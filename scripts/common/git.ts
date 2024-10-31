@@ -15,14 +15,14 @@ export async function cloneOrPull(repo: string): Promise<void> {
     await (exists(repo) ? pull(repo) : clone(repo))
 }
 
-export function createRepoGitClient(repo: string): SimpleGit {
+export function createRepoGitClient(repo: string, author?: { name: string; email: string } | null): SimpleGit {
     return simpleGit({
         baseDir: `${GIT_DIR}/${repo}`,
         binary: 'git',
         maxConcurrentProcesses: 1,
         config: [
-            'user.email="github-actions[bot]@users.noreply.github.com"',
-            'user.name="teamsykmelding-automations[bot]"',
+            `user.email="${author?.email ?? 'github-actions[bot]@users.noreply.github.com'}"`,
+            `user.name="${author?.name ?? 'teamsykmelding-automations[bot]'}"`,
         ],
     })
 }
