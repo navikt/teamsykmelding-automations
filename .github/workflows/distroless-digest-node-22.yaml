@@ -1,10 +1,10 @@
-name: "Frontend (node 20): Oppdatering av distroless digest"
+name: "Frontend (node 22): Oppdatering av distroless digest"
 on:
   workflow_dispatch:
   schedule:
     - cron: '30 6 * * 1'
 env:
-  DISTROLESS_IMAGE: gcr.io/distroless/nodejs20-debian12
+  DISTROLESS_IMAGE: gcr.io/distroless/nodejs22-debian12
 
 jobs:
   digest-changed:
