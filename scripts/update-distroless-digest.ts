@@ -6,10 +6,12 @@ import { cloneOrPull, createRepoGitClient, GIT_DIR } from './common/git.ts'
 import { octokit } from './common/octokit.ts'
 import path from 'node:path'
 import { getLatestDigestHash } from './common/docker.ts'
+import { getAuthor } from './common/authors.ts'
 
 const hasNewDigestArg = Bun.argv.includes('--has-new-digest')
 const makeChangesArg = Bun.argv.includes('--make-changes')
 const image = Bun.argv.find((it) => it.startsWith('--image='))?.split('=')[1] ?? raise('Missing --image=<image> flag')
+const author: string | null = Bun.argv.find((it) => it.startsWith('--author='))?.split('=')[1] ?? null
 
 if (!hasNewDigestArg && !makeChangesArg) {
     console.error('Missing --has-new-digest or --make-changes flag 😡')
@@ -69,9 +71,11 @@ if (hasNewDigestArg) {
     await cloneAllRepos()
     await updateAllDockerfiles(digest)
 
+    const triggeringAuthor = getAuthor(author)
+    const committer = triggeringAuthor ? { name: triggeringAuthor[0], email: triggeringAuthor[1] } : null
     const changedRepos = await Promise.all(
         relevantRepos.map(async (repo) => {
-            const git = createRepoGitClient(repo)
+            const git = createRepoGitClient(repo, committer)
             await git.add('Dockerfile')
             return git.commit(`automated: update distroless with newest digest`, ['--no-verify'])
         }),
