@@ -2,23 +2,23 @@
     "name": "teamsykmelding-slack-reminders",
     "type": "module",
     "dependencies": {
-        "date-fns": "^3.6.0",
+        "date-fns": "^4.1.0",
         "octokit": "^4.0.2",
-        "remeda": "^2.11.0",
+        "remeda": "^2.18.0",
         "rimraf": "^6.0.1",
-        "simple-git": "^3.25.0"
+        "simple-git": "^3.27.0"
     },
     "devDependencies": {
-        "@navikt/eslint-config-teamsykmelding": "^6.5.0",
+        "@navikt/eslint-config-teamsykmelding": "^7.1.0",
         "@types/js-yaml": "^4.0.9",
-        "bun-types": "^1.1.24",
-        "cronstrue": "^2.50.0",
+        "bun-types": "^1.1.40",
+        "cronstrue": "^2.52.0",
         "glob": "^11.0.0",
-        "husky": "^9.1.4",
+        "husky": "^9.1.7",
         "js-yaml": "^4.1.0",
         "pinst": "^3.0.0",
-        "prettier": "^3.3.3",
-        "typescript": "^5.5.4"
+        "prettier": "^3.4.2",
+        "typescript": "^5.7.2"
     },
     "prettier": "@navikt/eslint-config-teamsykmelding/prettier",
     "scripts": {
