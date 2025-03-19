@@ -77,7 +77,8 @@ async function getWeekOldPrs(team: string): Promise<Record<string, PrNode[]>> {
     return oldPrs
 }
 
-const weekOldPrs = await getWeekOldPrs('teamsykmelding')
+const [weekOldSykmelding, weekOldTsm] = await Promise.all([getWeekOldPrs('teamsykmelding'), getWeekOldPrs('tsm')])
+const weekOldPrs = { ...weekOldSykmelding, ...weekOldTsm }
 const count = Object.values(weekOldPrs).flat().length
 if (count === 0) {
     console.info('Found no week old pull requests')
