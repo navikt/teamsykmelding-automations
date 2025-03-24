@@ -146,7 +146,7 @@ function appendToFile(filename: string, lines: string[]) {
 }
 
 async function getRelevantRepositories(image: string): Promise<string[]> {
-    const repoNodes: { name: string; isArchived: boolean }[] = (
+    const teamsykmeldingNodes: { name: string; isArchived: boolean }[] = (
         (await octokit.graphql(
             `query OurRepos($team: String!) {
                 organization(login: "navikt") {
@@ -161,6 +161,22 @@ async function getRelevantRepositories(image: string): Promise<string[]> {
         )) as any
     ).organization.team.repositories.nodes
 
+    const tsmNodes: { name: string; isArchived: boolean }[] = (
+        (await octokit.graphql(
+                `query OurRepos($team: String!) {
+                organization(login: "navikt") {
+                    team(slug: $team) {
+                        repositories(orderBy: {field: PUSHED_AT, direction: DESC}) {
+                            nodes { name isArchived pushedAt url }
+                        }
+                    }
+                }
+            }`,
+            { team: 'tsm' },
+        )) as any
+    ).organization.team.repositories.nodes
+
+    const repoNodes = [...teamsykmeldingNodes, ...tsmNodes]
     const repositories: string[] = repoNodes.filter((it) => !it.isArchived).map((it: any): string => it.name)
 
     console.info(`Found ${repositories.length} non-archived repositories`)
